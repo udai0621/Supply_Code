@@ -1,0 +1,25 @@
+version: "3.9"
+services:
+  py3:
+    # build時の指定内容
+    build:
+      context: ./py3
+      dockerfile: Dockerfile
+    # ターミナル上でjupyter lab を構築する際の指示
+    entrypoint: >
+      jupyter-lab
+      --allow-root
+      --ip=0.0.0.0
+      --port=8888
+      --no-browser 
+      --NotebookApp.token=""
+      --notebook-dir=/workspace
+    expose:
+      - "8888"
+    # 利用可能なポート番号の指定
+    ports:
+      - "127.0.0.1:8888:8888"
+    # マウントする先を指定
+    volumes:
+      - ./py3/root_jupyter:/root/.jupyter
+      - ./workspace:/workspace

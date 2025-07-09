@@ -63,12 +63,102 @@ def _create_physbo_policy(self) -> physbo.search.discrete.policy:
     Returns:
         PHYSBOポリシーオブジェクト
     """
-    # 探索空間の次元数に基づいてtest_Xを生成
-    # 実際の実装では、探索空間に応じてより適切なtest_Xを設定
-    num_dims = len(self.search_space)
-    test_X = np.random.rand(1000, num_dims)  # 仮の探索点
+    # 探索空間に基づいて離散的な候補点を生成
+    test_X = self._generate_candidate_points()
     
     return physbo.search.discrete.policy(test_X=test_X, config=self.config)
+
+def _generate_candidate_points(self, num_points: int = 1000) -> np.ndarray:
+    """
+    探索空間に基づいて候補点を生成
+    
+    Args:
+        num_points: 生成する候補点数
+        
+    Returns:
+        候補点の配列 (num_points, num_dimensions)
+    """
+    num_dims = len(self.search_space)
+    
+    # 各次元で均等に分割した格子点を生成
+    grid_size = int(num_points ** (1.0 / num_dims)) + 1
+    
+    # 各次元の格子点を作成
+    dim_grids = []
+    param_names = list(self.search_space.keys())
+    
+    for param_name in param_names:
+        param_range = self.search_space[param_name]
+        # 0-1の範囲で正規化された格子点
+        grid = np.linspace(0, 1, grid_size)
+        dim_grids.append(grid)
+    
+    # 格子点の組み合わせを生成
+    mesh_grids = np.meshgrid(*dim_grids)
+    
+    # フラット化して候補点行列を作成
+    candidate_points = []
+    for i in range(len(mesh_grids[0].flat)):
+        point = []
+        for j in range(num_dims):
+            point.append(mesh_grids[j].flat[i])
+        candidate_points.append(point)
+    
+    candidate_array = np.array(candidate_points)
+    
+    # 指定された数になるように調整
+    if len(candidate_array) > num_points:
+        # ランダムサンプリングで削減
+        indices = np.random.choice(len(candidate_array), num_points, replace=False)
+        candidate_array = candidate_array[indices]
+    elif len(candidate_array) < num_points:
+        # ランダム点で補完
+        additional_points = num_points - len(candidate_array)
+        random_points = np.random.rand(additional_points, num_dims)
+        candidate_array = np.vstack([candidate_array, random_points])
+    
+    return candidate_array
+
+def _normalized_to_params(self, normalized_point: np.ndarray) -> Dict[str, float]:
+    """
+    正規化された点を実際のパラメータに変換
+    
+    Args:
+        normalized_point: 正規化された点 (0-1の範囲)
+        
+    Returns:
+        実際のパラメータ値
+    """
+    params = {}
+    param_names = list(self.search_space.keys())
+    
+    for i, param_name in enumerate(param_names):
+        param_range = self.search_space[param_name]
+        # 0-1の値を実際の範囲に変換
+        params[param_name] = param_range[0] + normalized_point[i] * (param_range[1] - param_range[0])
+    
+    return params
+
+def _params_to_normalized(self, params: Dict[str, float]) -> np.ndarray:
+    """
+    実際のパラメータを正規化された点に変換
+    
+    Args:
+        params: 実際のパラメータ値
+        
+    Returns:
+        正規化された点 (0-1の範囲)
+    """
+    normalized = []
+    param_names = list(self.search_space.keys())
+    
+    for param_name in param_names:
+        param_range = self.search_space[param_name]
+        # 実際の値を0-1の範囲に正規化
+        normalized_value = (params[param_name] - param_range[0]) / (param_range[1] - param_range[0])
+        normalized.append(normalized_value)
+    
+    return np.array(normalized)
 
 def _evaluate_objective(self, params: Dict[str, float], iteration: int) -> float:
     """
@@ -173,14 +263,30 @@ def optimize(self, max_iterations: Optional[int] = None) -> Tuple[Dict[str, floa
             # 子実験として各試行を記録
             with mlflow.start_run(run_name=f"trial_{iteration+1}", nested=True):
                 # 次の候補点を取得
-                action = self.policy.random_search(max_num_probes=1, simulator=None)
+                if iteration == 0:
+                    # 初回はランダム探索
+                    action = self.policy.random_search(max_num_probes=1, simulator=None)
+                else:
+                    # 2回目以降はベイズ最適化
+                    action = self.policy.bayes_search(max_num_probes=1, simulator=None)
                 
-                # パラメータの変換
-                params = action_to_params(action, self.search_space)
+                # actionがインデックスの場合は実際の値に変換
+                if isinstance(action, (int, np.integer)):
+                    # actionは候補点のインデックス
+                    selected_point = self.policy.test_X[action]
+                    params = self._normalized_to_params(selected_point)
+                elif isinstance(action, np.ndarray) and action.shape == ():
+                    # スカラーの場合
+                    selected_point = self.policy.test_X[int(action)]
+                    params = self._normalized_to_params(selected_point)
+                else:
+                    # 直接的な値の場合
+                    params = action_to_params(action, self.search_space)
                 
                 # パラメータの記録
                 mlflow.log_params(params)
                 mlflow.log_param("iteration", iteration + 1)
+                mlflow.log_param("action_index", int(action) if isinstance(action, (int, np.integer, np.ndarray)) else "direct")
                 
                 # 目的関数の評価
                 score = self._evaluate_objective(params, iteration)
@@ -205,7 +311,18 @@ def optimize(self, max_iterations: Optional[int] = None) -> Tuple[Dict[str, floa
                         mlflow.log_metric(f"convergence_{key}", value, step=iteration)
             
             # PHYSBOにフィードバック
-            self.policy.write(action, score)
+            if isinstance(action, (int, np.integer)):
+                self.policy.write(action, score)
+            elif isinstance(action, np.ndarray) and action.shape == ():
+                self.policy.write(int(action), score)
+            else:
+                # actionが候補点のインデックスでない場合の処理
+                # 最も近い候補点を探す
+                if hasattr(self.policy, 'test_X'):
+                    normalized_params = self._params_to_normalized(params)
+                    distances = np.sum((self.policy.test_X - normalized_params) ** 2, axis=1)
+                    closest_index = np.argmin(distances)
+                    self.policy.write(closest_index, score)
             
             # 収束判定
             if self._check_convergence(iteration):

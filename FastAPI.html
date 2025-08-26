@@ -4,368 +4,359 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>機械学習モデルをAPI化するチュートリアル</title>
+    <title>機械学習モデルのAPI化チュートリアル（FastAPI編）</title>
     <style>
-        @page {
-            margin: 2cm;
-            size: A4;
+        body {
+            font-family: 'Hiragino Kaku Gothic Pro', 'ヒラギノ角ゴ Pro', 'Yu Gothic Medium', '游ゴシック Medium', YuGothic, '游ゴシック体', 'Meiryo', sans-serif;
+            line-height: 1.7;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fafafa;
         }
 
 ```
-    * {
-        box-sizing: border-box;
-    }
-    
-    body {
-        font-family: 'Segoe UI', 'Hiragino Sans', 'Yu Gothic UI', Meiryo, sans-serif;
-        line-height: 1.6;
-        color: #333;
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-        background: white;
+    .container {
+        background-color: white;
+        padding: 40px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
     
     h1 {
-        color: #2c3e50;
-        border-bottom: 3px solid #3498db;
-        padding-bottom: 10px;
-        margin-top: 0;
-        font-size: 2em;
+        color: #2c5aa0;
+        text-align: center;
+        border-bottom: 3px solid #2c5aa0;
+        padding-bottom: 15px;
+        margin-bottom: 30px;
+        font-size: 2.2em;
     }
     
     h2 {
-        color: #34495e;
-        margin-top: 2em;
-        margin-bottom: 1em;
-        font-size: 1.5em;
-        border-left: 4px solid #3498db;
+        color: #e74c3c;
+        border-left: 5px solid #e74c3c;
         padding-left: 15px;
+        margin-top: 35px;
+        margin-bottom: 20px;
+        font-size: 1.5em;
     }
     
     h3 {
-        color: #2c3e50;
-        margin-top: 1.5em;
-        margin-bottom: 0.8em;
-        font-size: 1.2em;
+        color: #27ae60;
+        margin-top: 25px;
+        margin-bottom: 15px;
+        font-size: 1.3em;
     }
     
     h4 {
-        color: #34495e;
-        margin-top: 1.2em;
-        margin-bottom: 0.5em;
-        font-size: 1.1em;
-    }
-    
-    p {
-        margin-bottom: 1em;
-        text-align: justify;
-    }
-    
-    .highlight {
-        background: #fff3cd;
-        padding: 15px;
-        border-left: 4px solid #ffc107;
-        margin: 1em 0;
-        border-radius: 0 5px 5px 0;
-    }
-    
-    pre {
-        background: #f8f9fa;
-        border: 1px solid #e9ecef;
-        border-radius: 5px;
-        padding: 15px;
-        overflow-x: auto;
-        font-family: 'Consolas', 'Monaco', monospace;
-        font-size: 0.9em;
-        line-height: 1.4;
-        margin: 1em 0;
-        page-break-inside: avoid;
-    }
-    
-    code {
-        background: #f1f3f4;
-        padding: 2px 6px;
-        border-radius: 3px;
-        font-family: 'Consolas', 'Monaco', monospace;
-        font-size: 0.9em;
-    }
-    
-    pre code {
-        background: none;
-        padding: 0;
-    }
-    
-    .step-box {
-        background: #e8f5e8;
-        border: 1px solid #4caf50;
-        border-radius: 8px;
-        padding: 20px;
-        margin: 1.5em 0;
-        page-break-inside: avoid;
-    }
-    
-    .step-title {
-        font-weight: bold;
-        color: #2e7d32;
+        color: #8e44ad;
+        margin-top: 20px;
         margin-bottom: 10px;
         font-size: 1.1em;
     }
     
-    .warning {
-        background: #fff3e0;
-        border: 1px solid #ff9800;
-        border-radius: 5px;
+    pre {
+        background-color: #2d3748;
+        color: #e2e8f0;
+        padding: 20px;
+        border-radius: 8px;
+        overflow-x: auto;
+        margin: 15px 0;
+        border-left: 4px solid #4299e1;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 0.9em;
+    }
+    
+    code {
+        background-color: #f1f5f9;
+        color: #e53e3e;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 0.9em;
+    }
+    
+    .example-box {
+        background-color: #f0f8ff;
+        border: 2px solid #4299e1;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+    
+    .example-box h4 {
+        color: #2c5aa0;
+        margin-top: 0;
+    }
+    
+    .warning-box {
+        background-color: #fffbf0;
+        border: 2px solid #f6ad55;
+        border-radius: 8px;
         padding: 15px;
-        margin: 1em 0;
+        margin: 20px 0;
     }
     
-    .warning::before {
-        content: "⚠️ ";
-        font-weight: bold;
+    .warning-box h4 {
+        color: #c05621;
+        margin-top: 0;
     }
     
-    .info {
-        background: #e3f2fd;
-        border: 1px solid #2196f3;
-        border-radius: 5px;
+    .info-box {
+        background-color: #f0fff4;
+        border: 2px solid #68d391;
+        border-radius: 8px;
         padding: 15px;
-        margin: 1em 0;
+        margin: 20px 0;
     }
     
-    .info::before {
-        content: "💡 ";
-    }
-    
-    .example {
-        background: #f3e5f5;
-        border: 1px solid #9c27b0;
-        border-radius: 5px;
-        padding: 15px;
-        margin: 1em 0;
-    }
-    
-    .example::before {
-        content: "🔧 例: ";
-        font-weight: bold;
-        color: #7b1fa2;
+    .info-box h4 {
+        color: #22543d;
+        margin-top: 0;
     }
     
     ul, ol {
-        padding-left: 30px;
-        margin-bottom: 1em;
+        padding-left: 25px;
     }
     
     li {
-        margin-bottom: 0.5em;
+        margin-bottom: 8px;
     }
     
-    .toc {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        padding: 20px;
-        margin: 2em 0;
-        page-break-inside: avoid;
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
     }
     
-    .toc h2 {
-        margin-top: 0;
+    th, td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+    }
+    
+    th {
+        background-color: #f8f9fa;
         color: #495057;
-        border: none;
-        padding: 0;
+        font-weight: bold;
     }
     
-    .toc ul {
-        list-style-type: none;
-        padding-left: 0;
+    .file-structure {
+        background-color: #1a202c;
+        color: #e2e8f0;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 15px 0;
     }
     
-    .toc ul ul {
-        padding-left: 20px;
-        margin-top: 0.5em;
-    }
-    
-    .toc a {
-        color: #007bff;
-        text-decoration: none;
-    }
-    
-    .toc a:hover {
-        text-decoration: underline;
-    }
-    
-    .download-info {
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        background: #28a745;
-        color: white;
-        padding: 10px 15px;
-        border-radius: 5px;
-        font-size: 0.9em;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        z-index: 1000;
+    .emoji {
+        font-size: 1.2em;
     }
     
     @media print {
-        .download-info {
-            display: none;
-        }
-        
         body {
-            max-width: none;
-            padding: 0;
+            background-color: white;
+            font-size: 12pt;
         }
         
-        h1, h2, h3, h4 {
+        .container {
+            box-shadow: none;
+            border: none;
+        }
+        
+        pre {
+            background-color: #f8f9fa !important;
+            color: #333 !important;
+            border: 1px solid #ddd;
+            page-break-inside: avoid;
+        }
+        
+        h1, h2, h3 {
             page-break-after: avoid;
         }
         
-        pre, .step-box, .warning, .info, .example {
+        .example-box, .warning-box, .info-box {
             page-break-inside: avoid;
+            border-color: #ddd;
         }
-    }
-    
-    .footer {
-        margin-top: 3em;
-        padding-top: 2em;
-        border-top: 1px solid #dee2e6;
-        text-align: center;
-        color: #6c757d;
-        font-size: 0.9em;
     }
 </style>
 ```
 
 </head>
 <body>
-    <div class="download-info">
-        Ctrl+P (Windows) または Cmd+P (Mac) でPDF保存できます
-    </div>
+    <div class="container">
+        <h1>🤖 機械学習モデルのAPI化チュートリアル（FastAPI編）</h1>
 
 ```
-<h1>機械学習モデルをAPI化するチュートリアル</h1>
+    <h2>📋 概要</h2>
+    <p>このチュートリアルでは、機械学習モデルをFastAPIを使ってAPI化する方法を学びます。</p>
 
-<div class="toc">
-    <h2>目次</h2>
-    <ul>
-        <li><a href="#introduction">1. はじめに</a></li>
-        <li><a href="#prerequisites">2. 前提条件</a></li>
-        <li><a href="#installation">3. 必要なライブラリのインストール</a></li>
-        <li><a href="#step1">4. ステップ1: 機械学習モデルの作成</a></li>
-        <li><a href="#step2">5. ステップ2: Flask APIの作成</a></li>
-        <li><a href="#step3">6. ステップ3: APIの起動とテスト</a></li>
-        <li><a href="#step4">7. ステップ4: エラーハンドリングの改善</a></li>
-        <li><a href="#step5">8. ステップ5: 本番環境への対応</a></li>
-        <li><a href="#step6">9. ステップ6: APIドキュメントの作成</a></li>
-        <li><a href="#summary">10. まとめ</a></li>
-        <li><a href="#next-steps">11. 次のステップ</a></li>
-    </ul>
-</div>
-
-<section id="introduction">
-    <h2>はじめに</h2>
-    
-    <div class="highlight">
-        <p>機械学習モデルを作ったら、次はそれを実際に使える形にする必要があります。これは<strong>レストランで料理を作った後、お客さんに提供するためのサービス体制を整える</strong>のと似ています。</p>
-    </div>
-    
-    <p>どんなに美味しい料理（優秀なモデル）を作っても、お客さん（ユーザー）が簡単に注文できて、すぐに提供される仕組みがないと意味がありません。</p>
-    
-    <p>このチュートリアルでは、Python の Flask を使って、機械学習モデルを Web API として公開する方法を学びます。</p>
-</section>
-
-<section id="prerequisites">
-    <h2>前提条件</h2>
-    <ul>
-        <li>Python の基本知識</li>
-        <li>機械学習の基礎知識（scikit-learn を使ったことがある）</li>
-        <li>コマンドライン操作の基本</li>
-    </ul>
-</section>
-
-<section id="installation">
-    <h2>必要なライブラリのインストール</h2>
-    
-    <pre><code>pip install flask scikit-learn pandas numpy joblib requests</code></pre>
-</section>
-
-<section id="step1">
-    <h2>ステップ1: 簡単な機械学習モデルの作成</h2>
-    
-    <div class="info">
-        まず、アイリスの花の分類を行う簡単なモデルを作成します。これは<strong>花の専門家が花びらと萼片の長さ・幅を見て品種を判定する</strong>のをコンピューターに教える作業です。
+    <div class="example-box">
+        <h4>🏪 例え話：レストランのオーダーシステム</h4>
+        <p>これはレストランのオーダーシステムのようなものです。お客さん（クライアント）がメニュー（データ）を注文すると、厨房（機械学習モデル）が料理（予測結果）を作って提供する仕組みです。</p>
     </div>
 
-    <pre><code># model_training.py
+    <h2>🌸 使用するモデル</h2>
+    <p>今回は、アヤメの花の特徴から品種を分類するモデルを作成します。</p>
+    <ul>
+        <li><strong>入力：</strong> 花びらの長さ、幅、がくの長さ、幅</li>
+        <li><strong>出力：</strong> アヤメの品種（setosa、versicolor、virginica）</li>
+    </ul>
+
+    <h2>📦 必要なパッケージのインストール</h2>
+    <pre><code>pip install fastapi uvicorn scikit-learn pandas numpy joblib</code></pre>
+
+    <h2>ステップ1: 機械学習モデルの作成と保存</h2>
+    <p>まず、機械学習モデルを作成して保存しましょう。</p>
+
+    <h3>📄 train_model.py</h3>
+    <pre><code># train_model.py
 ```
 
-from sklearn import datasets
+import pandas as pd
+from sklearn.datasets import load_iris
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 import joblib
 
 # データの読み込み
 
-iris = datasets.load_iris()
+iris = load_iris()
 X, y = iris.data, iris.target
 
-# 訓練・テストデータの分割
+# 訓練用とテスト用にデータを分割
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# モデルの訓練
+# モデルの作成と訓練
 
 model = RandomForestClassifier(n_estimators=100, random_state=42)
 model.fit(X_train, y_train)
 
+# モデルの評価
+
+predictions = model.predict(X_test)
+accuracy = accuracy_score(y_test, predictions)
+print(f”モデルの精度: {accuracy:.2f}”)
+
 # モデルの保存
 
 joblib.dump(model, ‘iris_model.pkl’)
+print(“モデルを iris_model.pkl に保存しました”)
 
-# 品種名のマッピングも保存
+# 特徴量の名前とクラス名も保存
 
-species_mapping = {0: ‘setosa’, 1: ‘versicolor’, 2: ‘virginica’}
-joblib.dump(species_mapping, ‘species_mapping.pkl’)
+feature_names = iris.feature_names
+class_names = iris.target_names.tolist()
 
-print(“モデルの訓練完了！”)
-print(f”テストデータでの精度: {model.score(X_test, y_test):.2f}”)</code></pre>
-</section>
+model_info = {
+‘feature_names’: feature_names,
+‘class_names’: class_names
+}
+joblib.dump(model_info, ‘model_info.pkl’)</code></pre>
 
 ```
-<section id="step2">
-    <h2>ステップ2: Flask を使った基本的な API の作成</h2>
-    
-    <div class="info">
-        次に、保存したモデルを読み込んで、Web API として公開します。これは<strong>レストランの注文システム</strong>のようなものです。
-    </div>
+    <h2>ステップ2: データモデルの定義</h2>
+    <p>APIで受け取るデータの形式を定義します。これは、レストランのメニューを決めるようなものです。</p>
 
-    <pre><code># app.py
+    <h3>📄 models.py</h3>
+    <pre><code># models.py
 ```
 
-from flask import Flask, request, jsonify
+from pydantic import BaseModel
+from typing import List
+
+class IrisFeatures(BaseModel):
+“”“アヤメの特徴量を受け取るためのデータモデル”””
+sepal_length: float  # がくの長さ
+sepal_width: float   # がくの幅
+petal_length: float  # 花びらの長さ
+petal_width: float   # 花びらの幅
+
+```
+class Config:
+    schema_extra = {
+        "example": {
+            "sepal_length": 5.1,
+            "sepal_width": 3.5,
+            "petal_length": 1.4,
+            "petal_width": 0.2
+        }
+    }
+```
+
+class PredictionResponse(BaseModel):
+“”“予測結果を返すためのデータモデル”””
+predicted_class: str
+confidence: float
+probabilities: dict</code></pre>
+
+```
+    <h2>ステップ3: FastAPIアプリケーションの作成</h2>
+    <p>メインのAPIアプリケーションを作成します。</p>
+
+    <h3>📄 main.py</h3>
+    <pre><code># main.py
+```
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import HTMLResponse
 import joblib
 import numpy as np
+from models import IrisFeatures, PredictionResponse
+import uvicorn
 
-# Flask アプリケーションの初期化
+# FastAPIアプリケーションの作成
 
-app = Flask(**name**)
+app = FastAPI(
+title=“アヤメ分類API”,
+description=“アヤメの花の特徴から品種を予測するAPI”,
+version=“1.0.0”
+)
 
-# モデルと品種マッピングの読み込み
+# モデルとメタ情報の読み込み
 
+try:
 model = joblib.load(‘iris_model.pkl’)
-species_mapping = joblib.load(‘species_mapping.pkl’)
+model_info = joblib.load(‘model_info.pkl’)
+print(“モデルの読み込みが完了しました”)
+except FileNotFoundError:
+print(“エラー: モデルファイルが見つかりません。先にtrain_model.pyを実行してください。”)
+model = None
+model_info = None
 
-@app.route(’/’)
-def home():
-“”“APIの説明ページ”””
-return “””
-<h1>アイリス分類API</h1>
-<p>花びらと萼片の測定値から、アイリスの品種を予測します</p>
-<h2>使用方法:</h2>
-<p>POST /predict に以下のJSON形式でデータを送信:</p>
-<pre>
+@app.get(”/”, response_class=HTMLResponse)
+async def root():
+“”“ホームページ - APIの使い方を表示”””
+html_content = “””
+<!DOCTYPE html>
+<html>
+<head>
+<title>アヤメ分類API</title>
+<style>
+body { font-family: Arial, sans-serif; margin: 40px; }
+.container { max-width: 800px; }
+.example { background-color: #f5f5f5; padding: 10px; border-radius: 5px; }
+</style>
+</head>
+<body>
+<div class=“container”>
+<h1>🌸 アヤメ分類API</h1>
+<p>このAPIは、アヤメの花の特徴から品種を予測します。</p>
+
+```
+        &lt;h2&gt;使用方法&lt;/h2&gt;
+        &lt;p&gt;&lt;code&gt;/predict&lt;/code&gt; エンドポイントにPOSTリクエストを送信してください。&lt;/p&gt;
+        
+        &lt;h2&gt;例&lt;/h2&gt;
+        &lt;div class="example"&gt;
+            &lt;pre&gt;
+```
+
 {
 “sepal_length”: 5.1,
 “sepal_width”: 3.5,
@@ -373,273 +364,261 @@ return “””
 “petal_width”: 0.2
 }
 </pre>
-“””
-
-@app.route(’/predict’, methods=[‘POST’])
-def predict():
-“”“予測を行うエンドポイント”””
-try:
-# リクエストからデータを取得
-data = request.get_json()
+</div>
 
 ```
-    # 必要な項目があるかチェック
-    required_fields = ['sepal_length', 'sepal_width', 'petal_length', 'petal_width']
-    for field in required_fields:
-        if field not in data:
-            return jsonify({'error': f'{field} が必要です'}), 400
-    
-    # 特徴量の準備
-    features = np.array([[
-        data['sepal_length'],
-        data['sepal_width'], 
-        data['petal_length'],
-        data['petal_width']
+        &lt;h2&gt;API仕様書&lt;/h2&gt;
+        &lt;p&gt;&lt;a href="/docs"&gt;Swagger UI&lt;/a&gt; | &lt;a href="/redoc"&gt;ReDoc&lt;/a&gt;&lt;/p&gt;
+    &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+"""
+return html_content
+```
+
+@app.post(”/predict”, response_model=PredictionResponse)
+async def predict_iris(features: IrisFeatures):
+“”“アヤメの品種を予測する”””
+
+```
+if model is None:
+    raise HTTPException(
+        status_code=500, 
+        detail="モデルが読み込まれていません。train_model.pyを先に実行してください。"
+    )
+
+try:
+    # 入力データを配列に変換
+    input_data = np.array([[
+        features.sepal_length,
+        features.sepal_width,
+        features.petal_length,
+        features.petal_width
     ]])
     
-    # 予測の実行
-    prediction = model.predict(features)[0]
-    probability = model.predict_proba(features)[0]
+    # 予測実行
+    prediction = model.predict(input_data)[0]
+    probabilities = model.predict_proba(input_data)[0]
     
-    # 結果の準備
-    result = {
-        'prediction': species_mapping[prediction],
-        'prediction_id': int(prediction),
-        'probabilities': {
-            species_mapping[i]: float(prob) 
-            for i, prob in enumerate(probability)
-        }
+    # 結果を整理
+    predicted_class = model_info['class_names'][prediction]
+    confidence = float(max(probabilities))
+    
+    prob_dict = {
+        model_info['class_names'][i]: float(prob) 
+        for i, prob in enumerate(probabilities)
     }
     
-    return jsonify(result)
+    return PredictionResponse(
+        predicted_class=predicted_class,
+        confidence=confidence,
+        probabilities=prob_dict
+    )
     
 except Exception as e:
-    return jsonify({'error': str(e)}), 500
+    raise HTTPException(status_code=400, detail=f"予測エラー: {str(e)}")
 ```
 
-@app.route(’/health’, methods=[‘GET’])
-def health_check():
-“”“サーバーの健康状態をチェック”””
-return jsonify({‘status’: ‘healthy’, ‘message’: ‘API is running’})
+@app.get(”/health”)
+async def health_check():
+“”“ヘルスチェック”””
+return {
+“status”: “healthy”,
+“model_loaded”: model is not None,
+“message”: “APIは正常に動作しています”
+}
 
-if **name** == ‘**main**’:
-app.run(debug=True, host=‘0.0.0.0’, port=5000)</code></pre>
-</section>
-
-```
-<section id="step3">
-    <h2>ステップ3: API の起動とテスト</h2>
-
-    <div class="step-box">
-        <div class="step-title">サーバーの起動</div>
-        <pre><code>python app.py</code></pre>
-        <p>サーバーが起動すると、<code>http://localhost:5000</code> でAPIにアクセスできます。</p>
-    </div>
-
-    <h3>API のテスト方法</h3>
-
-    <h4>1. ブラウザでの確認</h4>
-    <p><code>http://localhost:5000</code> にアクセスして、API の説明ページを確認します。</p>
-
-    <h4>2. curl でのテスト</h4>
-    <pre><code># 予測リクエストの送信
-```
-
-curl -X POST http://localhost:5000/predict   
--H “Content-Type: application/json”   
--d ‘{
-“sepal_length”: 5.1,
-“sepal_width”: 3.5,
-“petal_length”: 1.4,
-“petal_width”: 0.2
-}’
-
-# ヘルスチェック
-
-curl http://localhost:5000/health</code></pre>
+@app.get(”/model-info”)
+async def get_model_info():
+“”“モデルの情報を取得”””
+if model_info is None:
+raise HTTPException(status_code=500, detail=“モデル情報が読み込まれていません”)
 
 ```
-    <h4>3. Python でのテスト</h4>
+return {
+    "feature_names": model_info['feature_names'],
+    "class_names": model_info['class_names'],
+    "model_type": "RandomForestClassifier"
+}
+```
+
+if **name** == “**main**”:
+uvicorn.run(app, host=“0.0.0.0”, port=8000)</code></pre>
+
+```
+    <h2>ステップ4: APIのテスト用スクリプト</h2>
+    <p>APIが正しく動作するかテストするスクリプトを作成します。</p>
+
+    <h3>📄 test_api.py</h3>
     <pre><code># test_api.py
 ```
 
 import requests
 import json
 
-# APIのURL
+# APIのベースURL
 
-url = ‘http://localhost:5000/predict’
+BASE_URL = “http://localhost:8000”
 
+def test_prediction():
+“”“予測APIをテスト”””
 # テストデータ
-
 test_data = {
-‘sepal_length’: 5.1,
-‘sepal_width’: 3.5,
-‘petal_length’: 1.4,
-‘petal_width’: 0.2
+“sepal_length”: 5.1,
+“sepal_width”: 3.5,
+“petal_length”: 1.4,
+“petal_width”: 0.2
 }
 
-# リクエストの送信
-
-response = requests.post(url, json=test_data)
+```
+# APIリクエストを送信
+response = requests.post(f"{BASE_URL}/predict", json=test_data)
 
 if response.status_code == 200:
-result = response.json()
-print(“予測結果:”)
-print(f”品種: {result[‘prediction’]}”)
-print(“確率:”)
-for species, prob in result[‘probabilities’].items():
-print(f”  {species}: {prob:.3f}”)
+    result = response.json()
+    print("✅ 予測成功!")
+    print(f"予測品種: {result['predicted_class']}")
+    print(f"信頼度: {result['confidence']:.2f}")
+    print("各品種の確率:")
+    for class_name, prob in result['probabilities'].items():
+        print(f"  {class_name}: {prob:.3f}")
 else:
-print(f”エラー: {response.status_code}”)
-print(response.text)</code></pre>
-</section>
-
-```
-<section id="step4">
-    <h2>ステップ4: エラーハンドリングの改善</h2>
-    
-    <div class="warning">
-        実際のアプリケーションでは、様々な種類のエラーが発生する可能性があります。これは<strong>レストランで注文を受ける際に、メニューにない料理を注文されたり、アレルギー情報が不明だったりする状況</strong>と似ています。
-    </div>
-
-    <pre><code># improved_app.py（一部抜粋）
+    print(f"❌ エラー: {response.status_code}")
+    print(response.text)
 ```
 
-def validate_input(data):
-“”“入力データの検証”””
-required_fields = [‘sepal_length’, ‘sepal_width’, ‘petal_length’, ‘petal_width’]
+def test_health():
+“”“ヘルスチェックをテスト”””
+response = requests.get(f”{BASE_URL}/health”)
+if response.status_code == 200:
+print(“✅ ヘルスチェック成功!”)
+print(json.dumps(response.json(), indent=2, ensure_ascii=False))
+else:
+print(f”❌ ヘルスチェックエラー: {response.status_code}”)
+
+if **name** == “**main**”:
+print(”=== APIテスト開始 ===”)
 
 ```
-# 必要なフィールドの存在確認
-for field in required_fields:
-    if field not in data:
-        return False, f'{field} が必要です'
+print("\n1. ヘルスチェック")
+test_health()
 
-# 数値型の確認
-for field in required_fields:
-    try:
-        float(data[field])
-    except (ValueError, TypeError):
-        return False, f'{field} は数値である必要があります'
+print("\n2. 予測テスト")
+test_prediction()
 
-# 値の範囲確認（実際のアイリスデータの範囲）
-ranges = {
-    'sepal_length': (4.0, 8.0),
-    'sepal_width': (2.0, 4.5),
-    'petal_length': (1.0, 7.0),
-    'petal_width': (0.1, 2.5)
-}
+print("\n=== テスト完了 ===")</code></pre>
 
-for field, (min_val, max_val) in ranges.items():
-    value = float(data[field])
-    if not (min_val <= value <= max_val):
-        return False, f'{field} は {min_val} から {max_val} の間である必要があります'
+    <h2>🚀 実行手順</h2>
 
-return True, None</code></pre>
-</section>
+    <h3>1. モデルの作成</h3>
+    <pre><code>python train_model.py</code></pre>
 
-<section id="step5">
-    <h2>ステップ5: 本番環境への対応</h2>
+    <h3>2. APIサーバーの起動</h3>
+    <pre><code>python main.py</code></pre>
+    <p>または</p>
+    <pre><code>uvicorn main:app --reload --host 0.0.0.0 --port 8000</code></pre>
 
-    <h3>1. 環境変数の使用</h3>
-    <pre><code># config.py
+    <h3>3. ブラウザでAPIドキュメントを確認</h3>
+    <ul>
+        <li>Swagger UI: <code>http://localhost:8000/docs</code></li>
+        <li>ReDoc: <code>http://localhost:8000/redoc</code></li>
+        <li>ホームページ: <code>http://localhost:8000</code></li>
+    </ul>
+
+    <h3>4. APIのテスト</h3>
+    <p>別のターミナルで：</p>
+    <pre><code>python test_api.py</code></pre>
+
+    <h2>🔧 curlでのテスト例</h2>
+
+    <h3>予測リクエスト</h3>
+    <pre><code>curl -X POST "http://localhost:8000/predict" \
+ -H "Content-Type: application/json" \
+ -d '{
+   "sepal_length": 5.1,
+   "sepal_width": 3.5,
+   "petal_length": 1.4,
+   "petal_width": 0.2
+ }'</code></pre>
+
+    <h3>ヘルスチェック</h3>
+    <pre><code>curl http://localhost:8000/health</code></pre>
+
+    <h3>モデル情報取得</h3>
+    <pre><code>curl http://localhost:8000/model-info</code></pre>
+
+    <h2>📁 プロジェクト構成</h2>
+    <div class="file-structure">
 ```
 
-import os
-
-class Config:
-MODEL_PATH = os.environ.get(‘MODEL_PATH’, ‘iris_model.pkl’)
-SPECIES_MAPPING_PATH = os.environ.get(‘SPECIES_MAPPING_PATH’, ‘species_mapping.pkl’)
-DEBUG = os.environ.get(‘FLASK_DEBUG’, ‘False’).lower() == ‘true’
-PORT = int(os.environ.get(‘PORT’, 5000))
-HOST = os.environ.get(‘HOST’, ‘0.0.0.0’)</code></pre>
+iris-api/
+├── main.py           # メインのAPIアプリケーション
+├── models.py         # データモデルの定義
+├── train_model.py    # モデルの訓練と保存
+├── test_api.py       # APIテスト用スクリプト
+├── iris_model.pkl    # 保存された機械学習モデル
+└── model_info.pkl    # モデルのメタ情報
+</div>
 
 ```
-    <h3>2. Docker化</h3>
-    <pre><code># Dockerfile
-```
+    <h2>🌍 本番環境への展開のヒント</h2>
 
-FROM python:3.9-slim
+    <h3>1. Docker化</h3>
+    <pre><code>FROM python:3.9-slim
+```
 
 WORKDIR /app
-
 COPY requirements.txt .
 RUN pip install -r requirements.txt
-
 COPY . .
-
-EXPOSE 5000
-
-CMD [“python”, “app.py”]</code></pre>
+CMD [“uvicorn”, “main:app”, “–host”, “0.0.0.0”, “–port”, “8000”]</code></pre>
 
 ```
-    <pre><code># requirements.txt
+    <h3>2. 環境変数の使用</h3>
+    <pre><code>import os
 ```
 
-Flask==2.3.2
-scikit-learn==1.3.0
-pandas==2.0.3
-numpy==1.24.3
-joblib==1.3.1
-gunicorn==21.2.0</code></pre>
+PORT = int(os.getenv(“PORT”, 8000))</code></pre>
 
 ```
-    <h3>3. Gunicorn での起動</h3>
-    <pre><code># 本番環境では Gunicorn を使用
+    <h3>3. ログの追加</h3>
+    <pre><code>import logging
 ```
 
-gunicorn –bind 0.0.0.0:5000 –workers 4 app:app</code></pre>
-</section>
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(**name**)</code></pre>
 
 ```
-<section id="step6">
-    <h2>ステップ6: API ドキュメントの作成</h2>
-    
-    <div class="info">
-        良いAPIには、使い方を説明するドキュメントが必要です。これは<strong>レストランのメニュー</strong>のようなものです。
+    <h3>4. セキュリティ強化</h3>
+    <pre><code>from fastapi.middleware.cors import CORSMiddleware
+```
+
+app.add_middleware(CORSMiddleware, …)</code></pre>
+
+```
+    <h2>📝 まとめ</h2>
+    <p>このチュートリアルでは、機械学習モデルをFastAPIでAPI化する基本的な方法を学びました。</p>
+
+    <div class="info-box">
+        <h4>🎯 重要なポイント</h4>
+        <ul>
+            <li>モデルの保存と読み込み（joblib使用）</li>
+            <li>Pydanticを使ったデータ検証</li>
+            <li>適切なエラーハンドリング</li>
+            <li>API仕様書の自動生成</li>
+            <li>テストの重要性</li>
+        </ul>
     </div>
 
-    <div class="example">
-        APIドキュメントエンドポイントの例を作成して、利用者が簡単に使い方を理解できるようにします。レスポンス例や エラーコードの説明も含めることで、開発者にとって使いやすいAPIになります。
+    <div class="example-box">
+        <h4>🏪 例え話で振り返ると</h4>
+        <p>レストラン（API）を開店し、メニュー（データモデル）を決め、厨房（機械学習モデル）を準備し、注文システム（エンドポイント）を構築し、最後にお客さん（クライアント）が満足するかテストしました。</p>
     </div>
-</section>
 
-<section id="summary">
-    <h2>まとめ</h2>
-    
-    <p>このチュートリアルでは、機械学習モデルをWeb APIとして公開する方法を学びました。重要なポイントは以下の通りです：</p>
-    
-    <div class="step-box">
-        <ol>
-            <li><strong>モデルの保存</strong>: 訓練したモデルを <code>joblib</code> で保存</li>
-            <li><strong>Flask での API 作成</strong>: シンプルで軽量なWebフレームワークを使用</li>
-            <li><strong>エラーハンドリング</strong>: 様々な入力に対して適切に対応</li>
-            <li><strong>バリデーション</strong>: 入力データの検証で予期しないエラーを防止</li>
-            <li><strong>本番対応</strong>: Docker化や環境変数の使用で実際の運用に対応</li>
-            <li><strong>ドキュメント</strong>: APIの使い方を明確に説明</li>
-        </ol>
+    <div class="warning-box">
+        <h4>🎉 おめでとうございます！</h4>
+        <p>これで、あなたの機械学習モデルは世界中どこからでもアクセスできるAPIになりました！</p>
     </div>
-    
-    <div class="highlight">
-        <p>これで、あなたの機械学習モデルは<strong>24時間営業のレストラン</strong>のように、いつでもどこからでもアクセスできる形になりました！</p>
-    </div>
-</section>
-
-<section id="next-steps">
-    <h2>次のステップ</h2>
-    
-    <ul>
-        <li>より複雑なモデル（ディープラーニングなど）のAPI化</li>
-        <li>認証機能の追加</li>
-        <li>キャッシュ機能の実装</li>
-        <li>モニタリングとログ分析</li>
-        <li>A/Bテスト機能の追加</li>
-    </ul>
-</section>
-
-<div class="footer">
-    <p>機械学習モデルAPI化チュートリアル | 作成日: 2025年8月</p>
 </div>
 ```
 
